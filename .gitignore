@@ -1,9 +1,37 @@
 ## .gitignore ##
+# Folder
+*_bk*
+*_ref*
+
+# Python
+*.pyc
+*.ipynb
+
+# Image File 
+*.jpg
+*.png
+
+# Text File
+*.txt
+*.csv
+
+# 3D Data
+*.stl
+
+# DL Data
+*.zip
+
+# Model
+*.h5
+*.json
+
+# Matlab Code
+*.m
+
+
 # ignore all
-*
-*/
-
+# *
+# */
 # allow any
-!*.py
-!*.bash
-
+#!*.py
+#!*.bash
