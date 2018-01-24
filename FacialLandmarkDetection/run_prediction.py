@@ -101,7 +101,7 @@ def main():
     input_size = input_size.astype(np.int)
   
     ### モデル名
-    model_name = 'model'
+    model_name = 'model/mdl_ep10/mdl_ep10'
     json_name = '{0}_architecture.json'.format(model_name)
     weights_name = '{0}_weights.h5'.format(model_name)
     
@@ -116,7 +116,7 @@ def main():
     io_fname = 'data\label.csv'
     X_test, y_test = load_data(image_path, label_path, io_fname, img_size, input_size)
     y_predict = model_predict(X_test, model)
-    No = 259
+    No = 250
     plot_2samples(X_test[No], y_test[No], X_test[No], y_predict[No], input_size)   
 
 if __name__ == "__main__":
