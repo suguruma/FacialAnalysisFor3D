@@ -117,7 +117,9 @@ def main():
     X_test, y_test = load_data(image_path, label_path, io_fname, img_size, input_size)
     y_predict = model_predict(X_test, model)
     No = 250
-    plot_2samples(X_test[No], y_test[No], X_test[No], y_predict[No], input_size)   
+    plot_2samples(X_test[No], y_test[No], X_test[No], y_predict[No], input_size)
+    print(y_predict[No])
+    plt.show()
 
 if __name__ == "__main__":
     main()

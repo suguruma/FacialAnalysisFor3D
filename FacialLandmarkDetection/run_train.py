@@ -154,8 +154,11 @@ def model_save(_model, _architecture_name, _weights_name):
 def main():
         
     ## Image Data
-    img_size = np.array([400, 360])  #[h, w]
-    input_size = img_size / 4 #4:[100, 90]
+    #img_size = np.array([400, 360])  #[h, w]
+    #input_size = img_size / 4 #4:[100, 90]
+    img_size = np.array([227, 227])  #[h, w] alexnet
+    input_size = img_size / 1
+    
     input_size = input_size.astype(np.int)
 
     ## Training Data Path
@@ -173,14 +176,14 @@ def main():
     plot_2samples(X[2], y[2], X[1], y[1], input_size)
     
     ### モデル名
-    model_name = 'mdl_ep10'
+    model_name = 'zfnet_ep10'
     model_path = "./model/{0}/".format(model_name)
-    json_name = model_path + '{0}_architecture.json'.format(model_name)
-    weights_name = model_path + '{0}_weights.h5'.format(model_name)
-    
+    json_name = model_path + 'architecture.json'
+    weights_name = model_path + 'weights.h5'
+ 
     ### モデル生成
     print("Build Model ...")
-    hist, model = model_fitting(X, y, net_mod.net(input_size), model_name, nb_epoch = 10)
+    hist, model = model_fitting(X, y, net_mod.vgg_16(input_size), model_name, nb_epoch = 10)
     model_save(model, json_name, weights_name)
     display_hist(hist)
 
