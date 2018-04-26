@@ -6,6 +6,7 @@
 import read_image as imread_mod
 import read_text as txtread_mod
 import build_network as net_mod
+from keras_resnet import ResnetBuilder as resbuilder
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,7 +56,7 @@ def common_filename_check(_fname1, _fname2, _fname1_str = 'Image', _fname2_str =
     
     return _com_fname1, _com_fname2
 
-def load_data(_image_path, _label_path, _io_fname, _img_size, _input_size, data_check = True):
+def load_data(_image_path, _label_path, _io_fname, _img_size, _input_size, data_check = False):
 
     ## Read image
     X, _iname = imread_mod.main(_image_path, _input_size)
@@ -66,13 +67,15 @@ def load_data(_image_path, _label_path, _io_fname, _img_size, _input_size, data_
     #print("y.shape == {}; y.min == {:.3f}; y.max == {:.3f}".format(y.shape, y.min(), y.max()))
 
     if data_check:
-        _iname, _tname = common_filename_check(_iname, _tname)        
+        _iname, _tname = common_filename_check(_iname, _tname, fname1_str, fname2_str)
         print("Common Files : {0}".format(len(_iname)))            
         _iname_path = []
         _tname_path = []
         for i in range(len(_iname)):
             _iname_path.append(_image_path.split('*')[0] + _iname[i])
             _tname_path.append(_label_path.split('*')[0] + _tname[i])
+            #_iname_path.append(_image_path.split('*')[0] + _image_path.split('*')[1] + _iname[i])
+            #_tname_path.append(_label_path.split('*')[0] + _label_path.split('*')[1] + _tname[i])
 
         X, _ = imread_mod.main(_iname_path, _input_size)
         y, _ = txtread_mod.main(_tname_path, _io_fname, _img_size, False)
@@ -123,7 +126,7 @@ def model_fitting(_X, _y, _model, _comment='sample', nb_epoch = 100):
 
     ## CallBack
     lr_cb = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
-    es_cb = EarlyStopping(patience=100)
+    es_cb = EarlyStopping(patience=10)
     tb_cb = TensorBoard(log_dir=log_filepath, histogram_freq=0, write_graph=True)  # ログ可視化/freq=1: each epoch
     cp_cb = ModelCheckpoint(filepath=save_chekpointpath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')  # モデル保存
     
@@ -154,21 +157,28 @@ def model_save(_model, _architecture_name, _weights_name):
 def main():
         
     ## Image Data
-    #img_size = np.array([400, 360])  #[h, w]
-    #input_size = img_size / 4 #4:[100, 90]
-    img_size = np.array([227, 227])  #[h, w] alexnet
-    input_size = img_size / 1
-    
+    img_size = np.array([400, 360])  #[h, w]
+    input_size = img_size / 1 #4:[100, 90]
+    #img_size = np.array([224, 224])  #[h, w] alexnet
+    #input_size = img_size / 1
+
     input_size = input_size.astype(np.int)
 
+    ## Parameter
+    datasetName = "before_set1_scale_yflip"
+    epoch = 100
+
     ## Training Data Path
-    image_path = 'data/img3dTo2d/before/*.jpg'
-    label_path = 'data/txt3dTo2d/before/*.txt'
-    io_fname = 'data/label.csv'
+    image_path = 'data//img3dTo2d//{0}//*.jpg'.format(datasetName)
+    label_path = 'data//txt3dTo2d//{0}//*.txt'.format(datasetName)
+    io_fname = 'data//{0}_label.csv'.format(datasetName)
 
     ### データ読み込み
     print("Read File ...")
     X, y = load_data(image_path, label_path, io_fname, img_size, input_size)
+
+    #データセットのみ作成-----------------------------------------------------------
+    #return 0
 
     ### 可視化
     print("Plot sample ...")
@@ -176,16 +186,23 @@ def main():
     plot_2samples(X[2], y[2], X[1], y[1], input_size)
     
     ### モデル名
-    model_name = 'zfnet_ep10'
+    model_name = 'lenet_{0}_ep{1}_expand_org'.format(datasetName, epoch)
     model_path = "./model/{0}/".format(model_name)
     json_name = model_path + 'architecture.json'
     weights_name = model_path + 'weights.h5'
  
     ### モデル生成
     print("Build Model ...")
-    hist, model = model_fitting(X, y, net_mod.vgg_16(input_size), model_name, nb_epoch = 10)
+    hist, model = model_fitting(X, y, net_mod.lenet(input_size), model_name, nb_epoch = epoch)
+
+    net = resbuilder()
+    mdl = net.build_resnet_18((1, input_size[0], input_size[1]), 28)
+    #hist, model = model_fitting(X, y, mdl, model_name, nb_epoch = epoch)
+
     model_save(model, json_name, weights_name)
     display_hist(hist)
 
+fname1_str = 'Image' #'Image'
+fname2_str = 'land' #'land'
 if __name__ == "__main__":
     main()

@@ -7,6 +7,8 @@ Created on Sun Nov  5 19:51:24 2017
 import numpy as np
 import glob
 import cv2
+import os
+
 
 #X = X.reshape(-1, 96, 96, 1)
 
@@ -36,7 +38,8 @@ def read_image(_data_path, _img_size):
 
     for i, filename in enumerate(files):
         ## make file ID : ファイルID生成
-        fname = extract_filename(filename, None) #.txt
+        #fname = extract_filename(filename, None) #.txt
+        fname = os.path.basename(filename)
         filename_dict[i] = fname
 
         ## pre-processing
@@ -67,7 +70,7 @@ def main(filename_path, img_size):
     ### ファイル名、画像の読み込み (リスト化)
     fname_dict, img_list = read_image(filename_path, img_size)
     print("Read Images : {0}".format(len(fname_dict)))
-            
+
     ### リシェイプ    
     X = image_change_scale(img_list, img_size)    
     return X, fname_dict

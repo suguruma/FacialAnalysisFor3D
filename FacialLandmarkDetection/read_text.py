@@ -70,7 +70,7 @@ def extract_filename(filepath, ext = None):
 '''
  テキストファイル読み込み
 '''       
-def read_landmark(_data_path): 
+def read_landmark(_data_path, _format = 1):
 
     files = None
     if type(_data_path) == str:
@@ -91,18 +91,33 @@ def read_landmark(_data_path):
         data = fp.read()
         fp.close()
 
-        landmarks = LandmarkData()
-        flag_of_start = False         
-        lines = data.split('\n')
-        for line in lines:
-            if "Format" in line:
-                flag_of_start = True
-            elif '#' in line and flag_of_start:
-                #[Area_Number][Index_Numer_in_Area][Index_Numer][X][Y]
-                vals = line.split(' ')
-                landmarks.add_parts_index(int(vals[4]) + 1) # start zero(0)
-                landmarks.add_Point( Point2D( int(vals[5]), int(vals[6]) ))
-        landmarks_list.append(landmarks)
+        if _format == 1:
+            landmarks = LandmarkData()
+            flag_of_start = False
+            lines = data.split('\n')
+            for line in lines:
+                if "ID" in line:
+                    flag_of_start = True
+                elif flag_of_start and len(line) > 0:
+                    #[No][ID][X][Y]
+                    vals = line.split(',')
+                    landmarks.add_parts_index(1) # start zero(0)
+                    landmarks.add_Point( Point2D( int(vals[2]), int(vals[3]) ))
+            landmarks_list.append(landmarks)
+        else:
+            landmarks = LandmarkData()
+            flag_of_start = False
+            lines = data.split('\n')
+            for line in lines:
+                if "Format" in line:
+                    flag_of_start = True
+                elif '#' in line and flag_of_start:
+                    #[Area_Number][Index_Numer_in_Area][Index_Numer][X][Y]
+                    vals = line.split(' ')
+                    landmarks.add_parts_index(int(vals[4]) + 1) # start zero(0)
+                    landmarks.add_Point( Point2D( int(vals[5]), int(vals[6]) ))
+            landmarks_list.append(landmarks)
+
         
     return filename_dict, landmarks_list
 
@@ -173,10 +188,21 @@ def main(filename_path, io_fname, img_size, READ_CSV = False):
 
     return y, fname_dict
 
+def convertNewFormat(fname_dict, lm_list):
+    import csv
+    for i in range(len(lm_list)):
+        with open(".//convert//" + fname_dict[i], 'w', newline='') as f:
+            writer = csv.writer(f, lineterminator='\n')
+            lm_label = ["No.", "ID", "POS(X)", "POS(Y)"]
+            writer.writerow(lm_label)
+            for j in range(len(lm_list[i].idx)):
+                row = [j + 1, 0, lm_list[i].Point[j].x, lm_list[i].Point[j].y]
+                writer.writerow(row)
+
 if __name__ == "__main__":
     ### ラベル入力 ###
-    READ_CSV = True
-    input_fname = 'data\label.csv'
+    READ_CSV = False
+    input_fname = 'data//label.csv'
     img_size = np.array([400, 360])  #[h, w]
 
     if(READ_CSV):
@@ -186,16 +212,17 @@ if __name__ == "__main__":
         
     else:
         ### ファイル名、特徴点の読み込み (リスト化)
-        filename_path = 'data\landmark\*.txt'
+        filename_path = 'data//txt3dTo2d//before//*.txt'
         fname_dict, lm_list = read_landmark(filename_path)
         print("Read Files: {0}".format(filename_path))
-    
+        convertNewFormat(fname_dict, lm_list)
+
         ### ラベル整形    
         lm_df = make_landmark_df(lm_list, fname_dict, landmark_dict)
 
         ### ラベル出力 (CSV)
-        save_fname = input_fname
-        write_landmark_df(lm_df, save_fname)
+        #save_fname = input_fname
+        #write_landmark_df(lm_df, save_fname)
 
     ### ラベル変換 
     y = landmark_change_scale(lm_df, img_size.max())
