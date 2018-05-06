@@ -76,7 +76,9 @@ def read_landmark(_data_path, _format = 1):
     if type(_data_path) == str:
         files = glob.glob(_data_path)
     elif type(_data_path) == list:
-        files = _data_path
+        files = []
+        for path in _data_path:
+            files.append(glob.glob(path)[0])
         
     filename_dict = {}
     landmarks_list = []

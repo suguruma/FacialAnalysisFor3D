@@ -83,7 +83,7 @@ def writeImageList(_list, _dir, _filename, _name):
     os.makedirs(dir, exist_ok=True)
     # write image
     for ino, img in enumerate(_list):
-        cv2.imwrite("{0}/{1}_{2}.jpg".format(dir, fname, ino), img)
+        cv2.imwrite("{0}/{1}{2}_{3}.jpg".format(dir, fname, _name, ino), img)
 
 def generateImages(_srcPath, _dstPath = None, _isDraw = False, _isWrite = False):
     if _dstPath == None:
@@ -131,10 +131,12 @@ def readText(filename):
     return header, data
 
 ## Flip
-def doTextFlip(_data, cols, height):
+def doTextFlip(_data, cols, rows):
     _list_data = copy.deepcopy(list(_data))
     for i in range(len(_list_data)):
-        _list_data[i][2] = str(cols - int(_list_data[i][2]))
+        i_flip = yflipID[i]
+        _list_data[i_flip][2] = str(cols - int(_list_data[i][2]))
+        _list_data[i_flip][3] = str(int(_list_data[i][3]))
     return _list_data
 
 ## Translation
@@ -184,8 +186,9 @@ def doTextScale_yFlip(_data, cols, rows):
                 continue
             dst = copy.deepcopy(_list_data) #
             for i in range(len(_list_data)):
-                dst[i][2] = str(cols - int(float(_list_data[i][2]) * xv))
-                dst[i][3] = str(int(float(_list_data[i][3]) * yv))
+                i_flip = yflipID[i]
+                dst[i_flip][2] = str(cols - int(float(_list_data[i][2]) * xv))
+                dst[i_flip][3] = str(int(float(_list_data[i][3]) * yv))
             txt_list.append(dst)
     return txt_list
 
@@ -200,7 +203,7 @@ def writeTextList(header, _list, _dir, _filename, _name):
     os.makedirs(dir, exist_ok=True)
 
     for ino, txt in enumerate(_list):
-        with open("{0}/{1}_{2}.txt".format(dir, fname, ino), 'w') as f:
+        with open("{0}/{1}{2}_{3}.txt".format(dir, fname, _name, ino), 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
             writer.writerow(header)
             writer.writerows(txt)
@@ -227,8 +230,11 @@ def generateTexts(_srcPath, _dstPath = None, _isDraw = False, _isWrite = False):
         writeTextList(header, txt_scale_list, _dstPath, filename, "_scale")
         writeTextList(header, txt_scale_yflip_list, _dstPath, filename, "_scale_yflip")
 
+# parts swap
+yflipID = {0:3, 1:2, 2:1, 3:0, 4:6, 5:7, 6:4, 7:5, 8:8, 9:9, 10:12, 11:11, 12:10, 13:13}
+
 if __name__ == "__main__":
-    datasetName = "before_set1"
+    datasetName = "before_set2"
     src_path = 'data/img3dTo2d/{0}'.format(datasetName)
     #dst_path = 'data/sample_img/{0}_extend'.format(datasetName)
     generateImages(_srcPath=src_path, _isDraw=False, _isWrite=True)

@@ -158,7 +158,7 @@ def main():
         
     ## Image Data
     img_size = np.array([400, 360])  #[h, w]
-    input_size = img_size / 1 #4:[100, 90]
+    input_size = img_size / 2 #4:[100, 90]
     #img_size = np.array([224, 224])  #[h, w] alexnet
     #input_size = img_size / 1
 

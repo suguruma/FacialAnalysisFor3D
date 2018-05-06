@@ -31,7 +31,9 @@ def read_image(_data_path, _img_size):
     if type(_data_path) == str:
         files = glob.glob(_data_path)
     elif type(_data_path) == list:
-        files = _data_path
+        files = []
+        for path in _data_path:
+            files.append(glob.glob(path)[0])
 
     filename_dict = {}
     image_list = []
@@ -82,7 +84,8 @@ if __name__ == "__main__":
     img_size = img_size.astype(np.int)
 
     ### ファイル名、画像の読み込み (リスト化)
-    filename_path = 'data\img\*.*'
+    path = 'data//sample_img//before_*//'
+    filename_path = os.path.dirname(path) + "//" +"*.jpg"
     fname_dict, img_list = read_image(filename_path, img_size)
     print("Read Files: {0}".format(filename_path))
 
